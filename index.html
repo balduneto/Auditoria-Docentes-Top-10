@@ -1,1 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico Interativo - Docente TOP 10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .indicator-button.active {
+            background-color: #005baa;
+            color: white;
+            border-color: #005baa;
+        }
+        .indicator-button {
+            transition: all 0.3s ease;
+        }
+        #winnersChart {
+            cursor: pointer;
+        }
+        .top-10-row {
+            background-color: #e6f7ff !important;
+        }
+        .disqualified-unit-row {
+            background-color: #fff7ed !important;
+        }
+        .disqualified-time-row {
+            background-color: #fff1f2 !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <!-- Cabeçalho -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-[#003f7f]">Auditoria de Resultados</h1>
+            <p class="text-xl md:text-2xl text-[#005baa] mt-2 font-light">Programa Docente TOP 10 - 5ª Edição</p>
+        </header>
+
+        <!-- Seção dos Vencedores (Gráfico Interativo) -->
+        <section id="winners" class="mb-12 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-center text-[#003f7f] mb-2">Resultado Final: Os 10 Vencedores</h2>
+            <p class="text-center text-gray-600 mb-8">Clique em uma barra para ver o detalhamento da pontuação de cada docente.</p>
+            <div class="relative h-[500px]">
+                <canvas id="winnersChart"></canvas>
+            </div>
+            <p class="text-center mt-6 text-sm text-gray-600 italic">*A seleção dos 10 vencedores respeitou o critério de no máximo 2 docentes premiados por unidade, conforme o edital.</p>
+            
+            <!-- Tabela de Classificação Geral (Top 20) -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-center text-[#003f7f] mb-6">Classificação Geral (Top 20) - Pós-Critérios</h3>
+                <div class="overflow-x-auto rounded-lg border">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Rank</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Docente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Unidade</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Admissão</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Tempo (Anos)</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Pontuação</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Status Final</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">Motivo da Desclassificação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-20-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Rows will be injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quadro Explicativo dos Indicadores -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-center text-[#003f7f] mb-6">Quadro Explicativo dos Indicadores</h3>
+                <div id="indicators-summary-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Cards dos indicadores serão inseridos aqui via JS -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Seção Interativa dos Indicadores -->
+        <section id="indicators">
+            <h2 class="text-3xl font-bold text-center text-[#003f7f] mb-8">Análise Detalhada por Indicador</h2>
+            
+            <!-- Botões de Navegação -->
+            <nav class="flex flex-wrap justify-center gap-2 md:gap-3 mb-8">
+                <!-- Botões dos indicadores serão inseridos aqui via JS -->
+            </nav>
+
+            <!-- Conteúdo do Indicador Selecionado -->
+            <div id="indicator-content" class="bg-white p-6 rounded-2xl shadow-lg min-h-[500px]">
+                <h3 id="indicator-title" class="text-2xl font-bold text-[#003f7f] mb-4"></h3>
+                <p id="indicator-description" class="text-gray-700 mb-6"></p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-semibold text-lg mb-4 text-center text-gray-800">Gráfico de Pontuação (Top 20)</h4>
+                        <div class="relative h-96">
+                            <canvas id="indicatorChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex-grow overflow-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Docente</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
+                                        <th scope="col" class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qtd.</th>
+                                        <th scope="col" class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Pontos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="indicator-table" class="bg-white divide-y divide-gray-200">
+                                    <!-- Linhas da tabela serão inseridas aqui via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="calculation-memory" class="mt-8 pt-6 border-t border-gray-200">
+                     <h4 class="font-semibold text-lg text-gray-800 mb-2">Memória de Cálculo</h4>
+                     <p id="calculation-text" class="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg"></p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal para Detalhes do Vencedor -->
+    <div id="winner-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col transform transition-transform duration-300 scale-95">
+            <div class="flex justify-between items-center p-5 border-b">
+                <h3 id="modal-title" class="text-xl md:text-2xl font-bold text-[#003f7f]"></h3>
+                <button id="modal-close" class="text-gray-500 hover:text-gray-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="modal-content" class="p-4 md:p-6 overflow-y-auto">
+                <!-- Details will be injected here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Register the datalabels plugin
+        Chart.register(ChartDataLabels);
+
+        const employmentData = {
+            "RENATA KELLY DE OLIVEIRA 8031": { admission: "22/03/2021", time: 4.6 },
+            "JULIO CESAR GAUDENCIO DE OLIVEIRA 6482": { admission: "02/01/2018", time: 7.8 },
+            "MILANNE DE CARVALHO MIRANDA": { admission: "03/09/2018", time: 7.1 },
+            "VINICIUS MENDES": { admission: "02/02/2022", time: 3.7 },
+            "MARCIO CARMONA COSTA": { admission: "02/01/2023", time: 2.8 },
+            "JENIFFER MARQUES MADALENA 9354": { admission: "18/01/2023", time: 2.7 },
+            "PRISCILA MARIA SOUSA MACHADO TEIXEIRA 10362": { admission: "02/05/2024", time: 1.5 },
+            "FERNANDO PEREIRA CELESTINO": { admission: "02/08/2010", time: 15.2 },
+            "LUDMILLA LETICIA CORREIA ALVES 9376": { admission: "19/01/2023", time: 2.7 },
+            "SILVIA LUDMILLA DE SOUZA ALVES ARAUJO 9352": { admission: "17/01/2023", time: 2.7 },
+            "ANA RAQUEL BARBOSA PATRIOTA": { admission: "12/01/2022", time: 3.8 },
+            "ALESSANDRO FERNANDES VAZ 7335": { admission: "08/05/2019", time: 6.4 },
+            "MURILO LOPES DE SOUZA 5555": { admission: "22/04/2013", time: 12.5 },
+            "DIANA MARGARIDA PINHO PEREIRA": { admission: "02/03/2021", time: 4.6 },
+            "PEDRO PAULO MESQUITA MENDES 7438": { admission: "01/08/2019", time: 6.2 },
+            "MARCIO JOSE DIAS 4564": { admission: "05/06/2023", time: 2.4 },
+            "SAYONARA MARTINS DOS SANTOS TAVEIRA": { admission: "07/02/2022", time: 3.7 },
+            "CINTYA RIBEIRO DE OLIVEIRA 4976": { admission: "19/01/2021", time: 4.7 },
+            "KEREN MARIA MACHADO SANTOS": { admission: "03/08/2020", time: 5.2 },
+            "ANA PAULA QUINTERNO MATOS 3798": { admission: "06/07/2020", time: 5.3 }
+        };
+
+        const rawData = [
+          { "Rank": 1, "Rótulos de Linha": "RENATA KELLY DE OLIVEIRA 8031", "Unidade": "JAIARA - SESI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 82.5 },
+          { "Rank": 2, "Rótulos de Linha": "JULIO CESAR GAUDENCIO DE OLIVEIRA 6482", "Unidade": "JAIARA - SESI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 82 },
+          { "Rank": 3, "Rótulos de Linha": "MILANNE DE CARVALHO MIRANDA de Carvalho Miranda", "Unidade": "JAIARA - SESI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 82 },
+          { "Rank": 4, "Rótulos de Linha": "VINICIUS MENDES Mendes", "Unidade": "CATALÃO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 3, "Pontuação - Ações Encantar para Avançar": 1.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 7, "Particiação em Concursos - Pontuação": 3.5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 80 },
+          { "Rank": 5, "Rótulos de Linha": "MARCIO CARMONA COSTA Carmona Costa", "Unidade": "ITUMBIARA - SENAI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 5, "Particiação em Concursos - Pontuação": 2.5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 79.5 },
+          { "Rank": 6, "Rótulos de Linha": "JENIFFER MARQUES MADALENA 9354", "Unidade": "CAMPINAS - SESI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 3, "Particiação em Concursos - Pontuação": 1.5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 79 },
+          { "Rank": 7, "Rótulos de Linha": "PRISCILA MARIA SOUSA MACHADO TEIXEIRA 10362", "Unidade": "SESI UNIVERSITÁRIO", "Qtd. Ações Encantar para Avançar": 6, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 8, "Formação Continuada - Outras Instituições - Pontuação": 8, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 6, "Particiação em Concursos - Pontuação": 3, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 78.5 },
+          { "Rank": 8, "Rótulos de Linha": "FERNANDO PEREIRA CELESTINO Pereira Celestino", "Unidade": "ROBERTO MANGE - SENAI", "Qtd. Ações Encantar para Avançar": 9, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 1, "Premiações em Concursos - Pontuação": 5, "Pontuação Geral": 77.5 },
+          { "Rank": 9, "Rótulos de Linha": "LUDMILLA LETICIA CORREIA ALVES 9376", "Unidade": "JAIARA - SESI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 1, "Formação Acadêmica - Pontuação": 5, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 77.5 },
+          { "Rank": 10, "Rótulos de Linha": "SILVIA LUDMILLA DE SOUZA ALVES ARAUJO 9352", "Unidade": "JAIARA - SESI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 2, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 1, "Formação Acadêmica - Pontuação": 5, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 77.5 },
+          { "Rank": 11, "Rótulos de Linha": "ANA RAQUEL BARBOSA PATRIOTA Raquel Barbosa Patriota", "Unidade": "JD. COLORADO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 2, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 2, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 1, "Premiações em Concursos - Pontuação": 5, "Pontuação Geral": 77 },
+          { "Rank": 12, "Rótulos de Linha": "ALESSANDRO FERNANDES VAZ 7335", "Unidade": "JD. COLORADO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 6, "Formação Continuada - Outras Instituições - Pontuação": 6, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 7, "Particiação em Concursos - Pontuação": 3.5, "Qtd. Premiações em Concursos": 2, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 76.5 },
+          { "Rank": 13, "Rótulos de Linha": "MURILO LOPES DE SOUZA 5555", "Unidade": "PLANALTO - SESI", "Qtd. Ações Encantar para Avançar": 7, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 6, "Particiação em Concursos - Pontuação": 3, "Qtd. Premiações em Concursos": 1, "Premiações em Concursos - Pontuação": 5, "Pontuação Geral": 75.5 },
+          { "Rank": 14, "Rótulos de Linha": "DIANA MARGARIDA PINHO PEREIRA Margarida Pinho Pereira", "Unidade": "VILA CANAÃ - SENAI", "Qtd. Ações Encantar para Avançar": 12, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 2, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 2, "Formação Continuada - Outras Instituições - Pontuação": 2, "Qtd. Formação Continuada - UNINDÚSTRIA": 18, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 2, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 13, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 6, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 74.5 },
+          { "Rank": 15, "Rótulos de Linha": "PEDRO PAULO MESQUITA MENDES 7438", "Unidade": "CATALÃO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 3, "Formação Continuada - Outras Instituições - Pontuação": 3, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 7, "Particiação em Concursos - Pontuação": 3.5, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 74 },
+          { "Rank": 16, "Rótulos de Linha": "MARCIO JOSE DIAS 4564", "Unidade": "ROBERTO MANGE - SENAI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 3, "Formação Continuada - UNINDÚSTRIA - Pontuação": 3, "Qtd. Indicadores da Qualidade": 2, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 6, "Particiação em Concursos - Pontuação": 3, "Qtd. Premiações em Concursos": 3, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 73.5 },
+          { "Rank": 17, "Rótulos de Linha": "SAYONARA MARTINS DOS SANTOS TAVEIRA Martins dos Santos", "Unidade": "JD. COLORADO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 4, "Pontuação - Ações Encantar para Avançar": 2, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 4, "Formação Continuada - Outras Instituições - Pontuação": 4, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 5, "Particiação em Concursos - Pontuação": 2.5, "Qtd. Premiações em Concursos": 2, "Premiações em Concursos - Pontuação": 10, "Pontuação Geral": 73.5 },
+          { "Rank": 18, "Rótulos de Linha": "CINTYA RIBEIRO DE OLIVEIRA 4976", "Unidade": "SESI UNIVERSITÁRIO", "Qtd. Ações Encantar para Avançar": 3, "Pontuação - Ações Encantar para Avançar": 1.5, "Qtd. Avaliação de Satisfação": 2, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 3, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 3, "Particiação em Concursos - Pontuação": 1.5, "Qtd. Premiações em Concursos": 1, "Premiações em Concursos - Pontuação": 5, "Pontuação Geral": 73 },
+          { "Rank": 19, "Rótulos de Linha": "KEREN MARIA MACHADO SANTOS Maria Machado Santos", "Unidade": "CATALÃO - SESI SENAI", "Qtd. Ações Encantar para Avançar": 8, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 1, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 1, "Particiação em Concursos - Pontuação": 0.5, "Qtd. Premiações em Concursos": 1, "Premiações em Concursos - Pontuação": 5, "Pontuação Geral": 73 },
+          { "Rank": 20, "Rótulos de Linha": "ANA PAULA QUINTERNO MATOS 3798", "Unidade": "ROBERTO MANGE - SENAI", "Qtd. Ações Encantar para Avançar": 10, "Pontuação - Ações Encantar para Avançar": 2.5, "Qtd. Avaliação de Satisfação": 2, "Avaliação de Satisfação - Pontuação": 15, "Qtd. Formação Acadêmica": 2, "Formação Acadêmica - Pontuação": 10, "Qtd. Formação Continuada - Outras Instituições": 10, "Formação Continuada - Outras Instituições - Pontuação": 10, "Qtd. Formação Continuada - UNINDÚSTRIA": 10, "Formação Continuada - UNINDÚSTRIA - Pontuação": 10, "Qtd. Indicadores da Qualidade": 1, "Indicadores da Qualidade - Pontuação": 20, "Qtd. Particiação em Concursos": 10, "Particiação em Concursos - Pontuação": 5, "Qtd. Premiações em Concursos": 0, "Premiações em Concursos - Pontuação": 0, "Pontuação Geral": 72.5 },
+        ];
+        
+        const fullData = rawData.map(docente => {
+            const key = Object.keys(employmentData).find(k => docente["Rótulos de Linha"].startsWith(k.split(" ").slice(0, 3).join(" ")));
+            const info = employmentData[key];
+            return {
+                ...docente,
+                admissionDate: info ? info.admission : 'N/A',
+                employmentTime: info ? info.time : 99 // Assume eligible if not found
+            }
+        });
+
+        const top20Data = fullData.slice(0, 20);
+
+        const indicators = {
+            unindustria: {
+                label: 'Formação UNINDÚSTRIA',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>`,
+                description: 'Valoriza o aprimoramento do docente por meio de cursos oferecidos pela UNINDÚSTRIA, reconhecendo o alinhamento com as diretrizes e competências institucionais.',
+                calculation: 'A pontuação é calculada atribuindo-se 1,0 ponto por curso certificado pela UNINDÚSTRIA, com um limite máximo de 10 pontos. Foram aceitos certificados de qualquer período.',
+                qtyKey: 'Qtd. Formação Continuada - UNINDÚSTRIA',
+                scoreKey: 'Formação Continuada - UNINDÚSTRIA - Pontuação'
+            },
+            outras: {
+                label: 'Formação (Outras Inst.)',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`,
+                description: 'Avalia a busca por conhecimento externo, desde que alinhado à Educação Básica ou Profissional, incentivando a atualização constante do corpo docente.',
+                calculation: 'Atribui-se 1,0 ponto por certificado de curso com carga horária mínima de 40 horas, concluído entre 01/01/2023 e 30/09/2025. A pontuação máxima é de 10 pontos.',
+                qtyKey: 'Qtd. Formação Continuada - Outras Instituições',
+                scoreKey: 'Formação Continuada - Outras Instituições - Pontuação'
+            },
+            academica: {
+                label: 'Formação Acadêmica',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`,
+                description: 'Reconhece a titulação formal do docente (pós-graduação lato sensu e stricto sensu), que qualifica sua atuação e eleva o nível acadêmico da instituição.',
+                calculation: 'Cada título de pós-graduação confere 5,0 pontos, limitado a 10,0 pontos no total. Diplomas/declarações são aceitos a partir de 01/01/2020 (exceto stricto sensu, que pode ser de qualquer período).',
+                qtyKey: 'Qtd. Formação Acadêmica',
+                scoreKey: 'Formação Acadêmica - Pontuação'
+            },
+            premiacoes: {
+                label: 'Premiações',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V2"></path><path d="M12 20v-3"></path><path d="m5.2 5.2 3.55 3.55"></path><path d="M15.25 15.25 18.8 18.8"></path><path d="M2 12h6"></path><path d="M16 12h6"></path><path d="m5.2 18.8 3.55-3.55"></path><path d="m15.25 8.75 3.55-3.55"></path><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>`,
+                description: 'Evidencia a excelência e o impacto das práticas pedagógicas do docente, através do reconhecimento em competições e concursos educacionais.',
+                calculation: 'Cada premiação comprovada em concursos educacionais equivale a 5,0 pontos. A pontuação máxima é de 10 pontos, referente ao período de 01/01/2023 a 30/09/2025.',
+                qtyKey: 'Qtd. Premiações em Concursos',
+                scoreKey: 'Premiações em Concursos - Pontuação'
+            },
+            participacao: {
+                label: 'Participação em Concursos',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.88z"></path><path d="M18 2v6h6"></path><path d="m12 18-3-3 3-3"></path><path d="M9 15h9"></path></svg>`,
+                description: 'Valoriza a iniciativa e o engajamento do docente em levar seus alunos e projetos para competições, fomentando uma cultura de desafio e inovação.',
+                calculation: 'A cada participação comprovada, atribui-se 0,5 ponto, com um teto de 5,0 pontos. Válido para comprovantes de 01/01/2023 a 30/09/2025.',
+                qtyKey: 'Qtd. Particiação em Concursos',
+                scoreKey: 'Particiação em Concursos - Pontuação'
+            },
+            qualidade: {
+                label: 'Indicadores de Qualidade',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20V16"></path></svg>`,
+                description: 'Reflete o desempenho coletivo da unidade escolar. A pontuação é atribuída aos docentes cujas escolas atingiram as metas de qualidade estabelecidas.',
+                calculation: 'Pontuação única de 20 pontos. SENAI: IDAP ≥ 8,0 ou CI ≥ 4,0. SESI: iSESI ≥ 6,0 ou utiliza-se a nota regional para escolas sem avaliação própria.',
+                qtyKey: 'Qtd. Indicadores da Qualidade',
+                scoreKey: 'Indicadores da Qualidade - Pontuação'
+            },
+            satisfacao: {
+                label: 'Avaliação de Satisfação',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"></path><path d="M12 12v.01"></path></svg>`,
+                description: 'Mede a percepção de qualidade do trabalho do docente diretamente pelos alunos, através da Avaliação de Reação ou da Comissão Própria de Avaliação (CPA).',
+                calculation: 'Pontuação única de 15 pontos se o resultado individual (SENAI) ou da escola (SESI) for ≥ 90%, ou conceito "bom" na CPA para faculdades.',
+                qtyKey: 'Qtd. Avaliação de Satisfação',
+                scoreKey: 'Avaliação de Satisfação - Pontuação'
+            },
+            encantar: {
+                label: 'Ações "Encantar para Avançar"',
+                icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8a13 13 0 0 1 13 13"></path><path d="M6 20h.01"></path><path d="M10 20h.01"></path><path d="M14 20h.01"></path><path d="M18 20h.01"></path></svg>`,
+                description: 'Mede o engajamento do docente em ações que conectam os alunos com o mundo da indústria (visitas, palestras etc.), fortalecendo o propósito do Sistema S.',
+                calculation: 'Cada atividade confere 0,5 ponto, com máximo de 2,5 pontos. Validade de 01/01/2023 a 30/09/2025.',
+                qtyKey: 'Qtd. Ações Encantar para Avançar',
+                scoreKey: 'Pontuação - Ações Encantar para Avançar'
+            }
+        };
+
+        let indicatorChart;
+        let winnersChart;
+        let finalWinnersList = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateFinalResults();
+            setupWinnersChart();
+            setupTop20Table();
+            setupIndicatorButtons();
+            setupIndicatorsSummary();
+            updateIndicatorView('unindustria'); // Inicializa com o primeiro indicador
+            setupModal();
+        });
+
+        function cleanDocenteName(name) {
+             let cleanedName = name.replace(/\s\d+$/, '').trim();
+             const parts = cleanedName.split(' ');
+             if (parts.length > 2) {
+                const lastPart = parts[parts.length - 1];
+                const secondLastPart = parts[parts.length - 2];
+                if (lastPart && secondLastPart && lastPart.toLowerCase() === secondLastPart.toLowerCase()) {
+                    parts.pop();
+                    cleanedName = parts.join(' ');
+                }
+             }
+             if (cleanedName.includes("de Carvalho Miranda de Carvalho Miranda")) {
+                cleanedName = cleanedName.replace(" de Carvalho Miranda de Carvalho Miranda", " de Carvalho Miranda");
+             }
+             return cleanedName;
+        }
+
+        function calculateFinalResults() {
+            const eligibleCandidates = fullData.filter(d => d.employmentTime >= 2);
+            
+            const winners = [];
+            const unitCount = {};
+            
+            for (const docente of eligibleCandidates) {
+                if (winners.length >= 10) break;
+                const unit = docente['Unidade'];
+                if (!unitCount[unit]) {
+                    unitCount[unit] = 0;
+                }
+                if (unitCount[unit] < 2) {
+                    winners.push(docente);
+                    unitCount[unit]++;
+                }
+            }
+            finalWinnersList = winners;
+        }
+        
+        function setupTop20Table() {
+            const tableBody = document.getElementById('top-20-table-body');
+            const potentialTop10Names = fullData.slice(0, 11).map(d => d['Rótulos de Linha']); 
+            const finalWinnerNames = finalWinnersList.map(w => w['Rótulos de Linha']);
+            
+            tableBody.innerHTML = '';
+            
+            top20Data.forEach(docente => {
+                let rowClass = '';
+                let statusFinal = '';
+                let motivo = '—';
+                let statusClass = '';
+
+                const isPotentialWinner = potentialTop10Names.includes(docente['Rótulos de Linha']);
+                const isFinalWinner = finalWinnerNames.includes(docente['Rótulos de Linha']);
+
+                if (isFinalWinner) {
+                    rowClass = 'top-10-row';
+                    statusFinal = 'TOP 10';
+                    statusClass = 'bg-green-100 text-green-800';
+                } else if (isPotentialWinner) {
+                    statusFinal = 'Desclassificado';
+                    if (docente.employmentTime < 2) {
+                        rowClass = 'disqualified-time-row';
+                        statusClass = 'bg-red-100 text-red-800';
+                        motivo = 'Tempo de serviço < 2 anos';
+                    } else {
+                        rowClass = 'disqualified-unit-row';
+                        statusClass = 'bg-orange-100 text-orange-800';
+                        motivo = 'Máximo de 2 por Unidade';
+                    }
+                } else {
+                     statusFinal = 'Classificado';
+                     statusClass = 'bg-gray-100 text-gray-800';
+                }
+                
+                const statusSpan = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusFinal}</span>`;
+
+                const row = document.createElement('tr');
+                row.className = rowClass;
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-center text-sm font-semibold text-gray-700">${docente.Rank}</td>
+                    <td class="px-6 py-3 text-sm font-medium text-gray-900">${cleanDocenteName(docente['Rótulos de Linha'])}</td>
+                    <td class="px-6 py-3 text-sm text-gray-600">${docente.Unidade}</td>
+                    <td class="px-4 py-3 text-center text-sm text-gray-600">${docente.admissionDate}</td>
+                    <td class="px-4 py-3 text-center text-sm font-medium ${docente.employmentTime < 2 ? 'text-red-600' : 'text-gray-800'}">${docente.employmentTime.toLocaleString('pt-BR')}</td>
+                    <td class="px-4 py-3 text-center text-sm font-bold text-[#003f7f]">${docente['Pontuação Geral'].toLocaleString('pt-BR')}</td>
+                    <td class="px-6 py-3 text-center text-sm">${statusSpan}</td>
+                    <td class="px-6 py-3 text-sm text-gray-700 text-center">${motivo}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function setupIndicatorsSummary() {
+            const grid = document.getElementById('indicators-summary-grid');
+            grid.innerHTML = '';
+
+            for (const key in indicators) {
+                const indicator = indicators[key];
+                let maxPoints = 0;
+                
+                const match = indicator.calculation.match(/(?:máxim[oa]\s(?:é\s)?de|limitado\sa|teto\sde|Pontuação\súnica\sde)\s([\d,.]+)/);
+
+                if (match && match[1]) {
+                    maxPoints = parseFloat(match[1].replace(',', '.'));
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 p-4 rounded-lg shadow-sm flex flex-col';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-[#005baa]">${indicator.icon}</span>
+                        <h4 class="font-bold text-md text-gray-800">${indicator.label}</h4>
+                    </div>
+                    <p class="text-xs text-gray-600 flex-grow">${indicator.description}</p>
+                    <p class="text-right font-bold text-lg text-[#003f7f] mt-3 pt-3 border-t border-dashed">
+                        Até ${maxPoints.toLocaleString('pt-BR')} pts
+                    </p>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function setupWinnersChart() {
+            const finalWinners = finalWinnersList.sort((a,b) => b['Pontuação Geral'] - a['Pontuação Geral']);
+            
+            const ctx = document.getElementById('winnersChart').getContext('2d');
+            const labels = finalWinners.map(d => [cleanDocenteName(d['Rótulos de Linha']), d['Unidade']]);
+            const scores = finalWinners.map(d => d['Pontuação Geral']);
+
+            if (winnersChart) {
+                winnersChart.destroy();
+            }
+
+            winnersChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pontuação Geral',
+                        data: scores,
+                        backgroundColor: finalWinners.map((_, i) => `hsl(207, 100%, ${75 - (i * 3.5)}%)`),
+                        borderColor: '#003f7f',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#eef2f7' },
+                            ticks: { font: { weight: 'bold', size: 14 } },
+                            max: Math.max(...scores) * 1.08 // Add space for labels
+                        },
+                        y: {
+                           grid: { display: false },
+                           ticks: { font: { size: 11 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: '#003f7f',
+                            titleFont: { size: 16, weight: 'bold' },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Pontuação Total: ${context.raw.toLocaleString('pt-BR')}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            offset: 4,
+                            color: '#003f7f',
+                            font: {
+                                weight: 'bold',
+                                size: 12,
+                            },
+                            formatter: (value) => {
+                                return value.toLocaleString('pt-BR');
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const winnerData = finalWinners[clickedIndex];
+                            showWinnerDetailsModal(winnerData);
+                        }
+                    },
+                    onHover: (event, chartElement) => {
+                        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+        
+        function setupModal() {
+            const modal = document.getElementById('winner-modal');
+            const modalContainer = modal.querySelector('div');
+            const closeButton = document.getElementById('modal-close');
+
+            function closeModal() {
+                modal.classList.add('opacity-0');
+                modalContainer.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            closeButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+        
+        function showWinnerDetailsModal(winnerData) {
+            const modal = document.getElementById('winner-modal');
+            const modalContainer = modal.querySelector('div');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+
+            modalTitle.innerHTML = `${cleanDocenteName(winnerData['Rótulos de Linha'])} <span class="text-lg font-normal text-gray-500">- ${winnerData['Pontuação Geral']} pts</span>`;
+
+            let contentHTML = '<div class="space-y-4">';
+
+            for (const key in indicators) {
+                const indicator = indicators[key];
+                const qty = winnerData[indicator.qtyKey];
+                const score = winnerData[indicator.scoreKey];
+
+                contentHTML += `
+                    <div class="p-4 border rounded-lg bg-gray-50/80 transition-shadow hover:shadow-sm">
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <h5 class="font-bold text-md text-[#005baa] flex items-center gap-2">${indicator.icon} ${indicator.label}</h5>
+                                <p class="text-xs text-gray-500 mt-1"><strong>Qtd. Enviada:</strong> ${qty}</p>
+                            </div>
+                            <p class="font-bold text-2xl text-[#003f7f] flex-shrink-0">${score.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-dashed">
+                            <p class="text-xs text-gray-600"><strong class="font-semibold">Memória de Cálculo:</strong> ${indicator.calculation}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentHTML += '</div>';
+            modalContent.innerHTML = contentHTML;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContainer.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function setupIndicatorButtons() {
+            const nav = document.querySelector('nav');
+            for (const key in indicators) {
+                const button = document.createElement('button');
+                button.className = 'indicator-button flex items-center gap-2 text-sm md:text-base font-medium py-2 px-4 rounded-full border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-100';
+                button.dataset.indicator = key;
+                button.innerHTML = `${indicators[key].icon} <span>${indicators[key].label}</span>`;
+                button.onclick = () => updateIndicatorView(key);
+                nav.appendChild(button);
+            }
+        }
+
+        function updateIndicatorView(key) {
+            const indicator = indicators[key];
+
+            // Atualiza botões
+            document.querySelectorAll('.indicator-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.indicator === key);
+            });
+
+            // Atualiza textos
+            document.getElementById('indicator-title').textContent = indicator.label;
+            document.getElementById('indicator-description').textContent = indicator.description;
+            document.getElementById('calculation-text').textContent = indicator.calculation;
+            
+            // Atualiza tabela
+            const tableBody = document.getElementById('indicator-table');
+            tableBody.innerHTML = '';
+            top20Data.forEach(docente => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${cleanDocenteName(docente['Rótulos de Linha'])}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${docente['Unidade']}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-center text-gray-500">${docente[indicator.qtyKey]}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-center font-semibold text-[#005baa]">${docente[indicator.scoreKey].toLocaleString('pt-BR')}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Atualiza gráfico
+            const ctx = document.getElementById('indicatorChart').getContext('2d');
+            const labels = top20Data.map(d => cleanDocenteName(d['Rótulos de Linha']));
+            const scores = top20Data.map(d => d[indicator.scoreKey]);
+
+            if (indicatorChart) {
+                indicatorChart.destroy();
+            }
+
+            indicatorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pontuação',
+                        data: scores,
+                        backgroundColor: '#005baa',
+                        borderColor: '#003f7f',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                             max: Math.max(...scores) > 0 ? Math.max(...scores) * 1.15 : 10 // Add space for labels
+                        },
+                        y: {
+                           display: false // Nomes muito longos, melhor ver na tabela
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Pontos: ${context.raw}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            offset: 4,
+                            color: '#003f7f',
+                            font: {
+                                weight: 'bold',
+                                size: 10,
+                            },
+                             formatter: (value) => {
+                                if (value > 0) {
+                                  return value.toLocaleString('pt-BR');
+                                }
+                                return ''; // Hide label if value is 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
 
